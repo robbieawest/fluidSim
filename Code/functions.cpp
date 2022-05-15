@@ -8,12 +8,11 @@ float convertToKey(sf::Vector2i pos);
 void Diffusion(std::vector<grid> &g, int b, std::vector<float> &x, std::vector<float> x0, float diff, float dt, int N, int iter) {
 
 	float a = dt * diff * (N - 2)  * (N - 2);
-    lin_solve(g, b, x, x0, a, 1 + 6 * a, N, iter);
+    solve(g, b, x, x0, a, 1 + 6 * a, N, iter);
 }
 
-void lin_solve(std::vector<grid> &g, int boundarySide, std::vector<float> &target, std::vector<float> oldTarget, float a, float c, int N, int iter) {
+void solve(std::vector<grid> &g, int boundarySide, std::vector<float> &target, std::vector<float> oldTarget, float a, float c, int N, int iter) {
 
-	float cRecip = 1.0 / c;
 
     //Use gauss seidel relaxion to approximate values, turns out the diffusion calculation and the divergence calculation are the same, so they can be neatly put into the same 
     //function with the same method.
@@ -26,13 +25,13 @@ void lin_solve(std::vector<grid> &g, int boundarySide, std::vector<float> &targe
         for (int j = 1; j < N - 1; j++) {
 
             for (int i = 1; i < N - 1; i++) {
-				target[IX(i, j)] =
-					(oldTarget[IX(i, j)]
-					+ a * (target[IX((i + 1), j)]
-					+ target[IX((i - 1), j)]
-					+ target[IX(i, (j + 1))]
-					+ target[IX(i, (j - 1))]
-					)) * cRecip;
+                target[IX(i, j)] =
+                    (oldTarget[IX(i, j)]
+                        + a * (target[IX((i + 1), j)]
+                            + target[IX((i - 1), j)]
+                            + target[IX(i, (j + 1))]
+                            + target[IX(i, (j - 1))]
+                            )) / c;
             }
 
         }
@@ -58,8 +57,8 @@ void ClearDivergence(std::vector<grid> &g, std::vector<float>& velocX, std::vect
     setBoundaries(0, div, N);
     setBoundaries(0, p, N);
 
-    //calculate p values, i am not entirely sure what these are, but it is a scalar field
-    lin_solve(g, 0, p, div, 1, 6, N, iter);
+    //calculate p values
+    solve(g, 0, p, div, 1, 6, N, iter);
 
 
     //find gradient vector field of this scalar p field, vector calculus states that the curl of this vector field is zero
@@ -280,32 +279,6 @@ void mouseVInteract(std::vector<grid> g, Fluid& F, int N, sf::Vector2i pastMouse
     if(curr.x > 0 && curr.x < N - 1 && curr.y > 0 && curr.y + N - 1)
        F.addVelocity(sf::Vector2f(newV.x / 2, -1 * newV.y / 2), curr.x, curr.y);
 }
-
-
-
-//Did not follow through on walls, these two functions are not used
-/*
-void mousePlaceWall(std::vector<grid> &g, sf::Vector2i mousePos, int N, std::unordered_map<float, sf::Vector2i> &walls) {
-    
-    sf::Vector2i curr = returnIndexFromMouse(g, mousePos, N);
-    g[IX(curr.x, curr.y)].isWall = true;
-	g[IX(curr.x, curr.y)].self.setFillColor(sf::Color(40, 90, 120, 40));
-
-    if (walls.find(convertToKey(curr)) == walls.end()) {
-        walls.insert(std::make_pair(convertToKey(curr), curr));
-    }
-}
-
-void mouseRemoveWall(std::vector<grid>& g, sf::Vector2i mousePos, int N, std::unordered_map<float, sf::Vector2i> &walls) {
-
-    sf::Vector2i curr = returnIndexFromMouse(g, mousePos, N);
-    g[IX(curr.x, curr.y)].isWall = false;
-	g[IX(curr.x, curr.y)].arrow.setSize(sf::Vector2f(900 / N / 3 * 2, 900 / N * 3 / 5 * 2));
-
-    walls.erase(convertToKey(curr));
-    
-}
-*/
 
 float convertToKey(sf::Vector2i pos) {
     return float(pos.x) / float(pos.y) + pos.x + pos.y;
