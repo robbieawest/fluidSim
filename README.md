@@ -8,7 +8,8 @@ Small amount of commits as was created without GitHub then imported to it
 ### Windows
 On Windows you can just run Fluid.exe inside of "Items for Running"
 
-###Linux
+### Linux
+
 I have provided nothing except code/linuxrun
 linuxrun is just all code in one file since I had errors with compiling SFML
 ```
