@@ -4,7 +4,7 @@
 
 Small amount of commits as was created without GitHub then imported to it
 
-##How to run
+## How to run
 ### Windows
 On Windows you can just run Fluid.exe inside of "Items for Running"
 
